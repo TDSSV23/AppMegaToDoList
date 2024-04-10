@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Image, TextInput, StyleSheet, Text, View, TouchableOpacity, Modal, FlatList, Button } from 'react-native';
+import { Image, TextInput, StyleSheet, Text, View, TouchableOpacity, Modal, FlatList, Button, Alert } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker'; 
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import * as Sensors from 'expo-sensors';
+import * as WebBrowser from 'expo-web-browser';
 
 export default function App() {
   const navigation = useNavigation();
@@ -30,6 +32,7 @@ export default function App() {
   const [selectedImageUri, setSelectedImageUri] = useState(null);
   const [image, setImage] = useState(null);
   const [searchText, setSearchText] = useState('');
+  const [subscription, setSubscription] = useState(null);
 
   // Função para abrir o modal de edição com os detalhes do contato
   const handleOpenEditModal = (contact) => {
@@ -129,6 +132,39 @@ export default function App() {
       trigger: null,
     });
   };
+  // Function to handle Accelerometer data
+  const handleAccelerometerData = ({ x, y, z }) => {
+    const accelerationThreshold = 5; // Adjust this value based on your requirement
+
+    if (Math.abs(x) > accelerationThreshold || Math.abs(y) > accelerationThreshold || Math.abs(z) > accelerationThreshold) {
+      Alert.alert(
+        'Adicionar Tarefa',
+        'Você quer adicionar uma nova Tarefa?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'OK', onPress: () => setModalVisible(true) },
+        ],
+        { cancelable: false }
+      );
+    }
+  };
+
+  // Function to subscribe to Accelerometer data
+  const _subscribe = () => {
+    setSubscription(Sensors.Accelerometer.addListener(handleAccelerometerData));
+  };
+
+  // Function to unsubscribe from Accelerometer data
+  const _unsubscribe = () => {
+    subscription && subscription.remove();
+    setSubscription(null);
+  };
+
+  useEffect(() => {
+    _subscribe();
+    return () => _unsubscribe();
+  }, []);
+
 
   const handleAddContact = async () => {
     if (contactName.trim() === '' || selectedCategory === null) {
