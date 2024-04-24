@@ -8,6 +8,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import * as Sensors from 'expo-sensors';
 import * as WebBrowser from 'expo-web-browser';
+import { Audio } from 'expo-av';
 
 export default function App() {
   const navigation = useNavigation();
@@ -33,6 +34,31 @@ export default function App() {
   const [image, setImage] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [subscription, setSubscription] = useState(null);
+  const [result, setResult] = useState(null);
+  const [sound, setSound] = useState();
+
+  async function playSound() {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync(require('./assets/not.mp3'));
+    setSound(sound);
+
+    console.log('Playing Sound');
+    await sound.playAsync();
+  }
+
+  useEffect(() => {
+    playSound(); // Chama a função para tocar o som ao abrir o app
+  }, []); // Usando um array de dependências vazio para garantir que só toque uma vez
+
+
+  const _handlePressButtonAsync = async () => {
+    let result = await WebBrowser.openBrowserAsync('https://www.figma.com/file/r2Y2QCWHwlTC18KG2fzDyk/Lista-de-Tarefas?type=design&node-id=0%3A1&mode=design&t=upYANw7mYMh7NVES-1');
+    setResult(result);
+  };
+  const _handlePressButtonAsyncD = async () => {
+    let result = await WebBrowser.openBrowserAsync('https://marcellavizona.github.io/App_mega_ToDo_list/');
+    setResult(result);
+  };
 
   // Função para abrir o modal de edição com os detalhes do contato
   const handleOpenEditModal = (contact) => {
@@ -404,16 +430,34 @@ export default function App() {
         paddingTop: 10,
       }}>
        
-        <View style= {{paddingRight: 80}}>
-          <View style={styles.bottomButtonContainer}>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => setModalVisible(true)}
-            >
-              <Text style={styles.addButtonText}>+</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+       <View style={{
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  backgroundColor: '#000000',
+  paddingTop: 10,
+}}>
+
+ 
+
+  {/* Novos botões adicionados */}
+  <View style={{
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  backgroundColor: '#000000',
+  paddingTop: 10,
+}}>
+  <TouchableOpacity style={styles.bottomButtonContainerB} onPress={_handlePressButtonAsync}>
+    <Text style={styles.buttonText}>Figma</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.bottomButtonContainer} onPress={() => setModalVisible(true)}>
+    <Text style={styles.addButtonText}>+</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.bottomButtonContainerB} onPress={_handlePressButtonAsyncD}>
+    <Text style={styles.buttonText}>Desc</Text>
+  </TouchableOpacity>
+</View>
+
+</View>
         
       </View>
     </LinearGradient>
@@ -506,6 +550,12 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 1,
   },
+  bottomButtonContainerB: {
+    position: 'absolute',
+    bottom: 10,
+    right: 20,
+    zIndex: 1,
+  },
   addButton: {
     backgroundColor: 'rgb(25, 122, 207)',
     width: 50,
@@ -586,5 +636,29 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 20,
   },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    paddingHorizontal: 20,
+  },
+  bottomButtonContainer: {
+    backgroundColor: 'rgb(25, 122, 207)',
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 100,
+    height: 50,
+  },
+  bottomButtonContainerB: {
+    backgroundColor: 'rgb(25, 122, 207)',
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 100,
+    height: 50,
+    marginRight: 30,
+    marginLeft: 30,
+  },
+  
   
 });
